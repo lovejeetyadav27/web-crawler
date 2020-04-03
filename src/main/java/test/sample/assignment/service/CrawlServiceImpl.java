@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @Service
 public class CrawlServiceImpl implements CrawlService {
@@ -57,27 +55,25 @@ public class CrawlServiceImpl implements CrawlService {
 
 		ResponseBean responseBean = new ResponseBean();
 
-		requestDB.request.put(requestId, responseBean);
+		RequestDB.request.put(requestId, responseBean);
 
 		HashSet<String> links = new HashSet<>();
-		BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
 		System.out.println("Crawling Link:" + url);
 		if (!url.contains(HTTP))
 			url = HTTP + "://" + url;
 
-		crawlURLinThread(/* queue, */links, url, depth, requestId, requestDB);
+		crawlURLinThread(links, url, depth, requestId, requestDB);
 
 		return requestId;
 
 	}
 
-	public void crawlURLinThread(/* BlockingQueue<String> queue, */Set<String> links, String url, Integer depth,
-			String requestId, RequestDB requestDb) {
+	public void crawlURLinThread(Set<String> links, String url, Integer depth, String requestId, RequestDB requestDb) {
 
-		Thread t1 = new Thread(new InsertData(/* queue, */links, url, depth, requestId, requestDb));
-		t1.start();
-		System.out.println("Thread started");
+		Thread parent = new Thread(new InsertData(links, url, depth, requestId, requestDb));
+		parent.start();
+		System.out.println("parent thread started");
 
 	}
 
